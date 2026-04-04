@@ -2,7 +2,6 @@ package ru.yandex.practicum.sleeptracker;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 public class SleepQuality implements Function<List<SleepingSession>, SleepAnalysisResult> {
