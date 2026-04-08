@@ -44,7 +44,7 @@ public class SleepTrackerAppTest {
     @Test
     public void testBADQualitiSleep() {
         SleepAnalysisResult result = new BadSleepQuality().apply(sleepSessionsTest);
-        assertEquals( 1, result.getResult(), "Должен посчитать сессии с плохим качеством сна. Сейчас BAD = 1");
+        assertEquals(1, result.getResult(), "Должен посчитать сессии с плохим качеством сна. Сейчас BAD = 1");
 
         sleepSessionsTest.add(new SleepingSession("06.02.26 06:15", "06.02.26 08:15", QualitiSleep.BAD));
         result = new BadSleepQuality().apply(sleepSessionsTest);
@@ -56,7 +56,7 @@ public class SleepTrackerAppTest {
         sleepSessionsTest.set(1, new SleepingSession("02.02.26 17:00", "02.02.26 23:00", QualitiSleep.GOOD));
         SleepAnalysisResult result = new BadSleepQuality().apply(zeroSessions);
 
-        assertEquals(0,result.getResult(), "Сессии пустые , соответственно там должен быть 0");
+        assertEquals(0, result.getResult(), "Сессии пустые , соответственно там должен быть 0");
     }
 
     //Тестировка количества сессий сна
