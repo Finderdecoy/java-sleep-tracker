@@ -17,11 +17,11 @@ public class SleepTrackerAppTest {
     @BeforeEach
     public void before() {
         sleepSessionsTest = new ArrayList<>(List.of(
-                new SleepingSession("01.02.26 22:00", "02.02.26 07:00", "GOOD"),
-                new SleepingSession("02.02.26 17:00", "02.02.26 23:00", "BAD"),
-                new SleepingSession("03.02.26 23:15", "04.02.26 09:30", "GOOD"),
-                new SleepingSession("04.02.26 00:00", "05.02.26 13:30", "NORMAL"),
-                new SleepingSession("06.02.26 06:15", "06.02.26 14:30", "GOOD"))) {
+                new SleepingSession("01.02.26 22:00", "02.02.26 07:00", QualitiSleep.GOOD),
+                new SleepingSession("02.02.26 17:00", "02.02.26 23:00", QualitiSleep.BAD),
+                new SleepingSession("03.02.26 23:15", "04.02.26 09:30", QualitiSleep.GOOD),
+                new SleepingSession("04.02.26 00:00", "05.02.26 13:30", QualitiSleep.NORMAL),
+                new SleepingSession("06.02.26 06:15", "06.02.26 14:30", QualitiSleep.GOOD))) {
         };
         zeroSessions = new ArrayList<>();
     }
@@ -32,32 +32,32 @@ public class SleepTrackerAppTest {
         SleepAnalysisResult resultMinuts = new AvarageMinutsSession().apply(sleepSessionsTest);
         assertEquals(852, resultMinuts.getResult(), "Среднее время приведенное к Int");
         //добавим еще 1 запись на 6 часов
-        sleepSessionsTest.add(new SleepingSession("06.02.26 06:15", "06.02.26 07:15", "GOOD"));
+        sleepSessionsTest.add(new SleepingSession("06.02.26 06:15", "06.02.26 07:15", QualitiSleep.GOOD));
         resultMinuts = new AvarageMinutsSession().apply(sleepSessionsTest);
         assertEquals(720, resultMinuts.getResult(), "Добавили 60 минут сна.");
 
         resultMinuts = new AvarageMinutsSession().apply(zeroSessions);
-        assertEquals(-1, resultMinuts.getResult(), "0 сессий");
+        assertEquals(0, resultMinuts.getResult(), "0 сессий");
 
     }
 
     //тест плохого качества сна
     @Test
     public void testBADQualitiSleep() {
-        SleepAnalysisResult result = new SleepQuality().apply(sleepSessionsTest);
-        assertEquals(1, result.getResult(), "Должен посчитать сессии с плохим качеством сна. Сейчас BAD = 1");
+        SleepAnalysisResult result = new BadSleepQuality().apply(sleepSessionsTest);
+        assertEquals( 1, result.getResult(), "Должен посчитать сессии с плохим качеством сна. Сейчас BAD = 1");
 
-        sleepSessionsTest.add(new SleepingSession("06.02.26 06:15", "06.02.26 08:15", "BAD"));
-        result = new SleepQuality().apply(sleepSessionsTest);
+        sleepSessionsTest.add(new SleepingSession("06.02.26 06:15", "06.02.26 08:15", QualitiSleep.BAD));
+        result = new BadSleepQuality().apply(sleepSessionsTest);
         assertEquals(2, result.getResult(), "Увеличили количество сессий с плохим сном. Сейчас BAD = 2");
     }
 
     @Test
     public void testWhithOutBADQualitiSleep() {
-        sleepSessionsTest.set(1, new SleepingSession("02.02.26 17:00", "02.02.26 23:00", "GOOD"));
-        SleepAnalysisResult result = new SleepQuality().apply(zeroSessions);
+        sleepSessionsTest.set(1, new SleepingSession("02.02.26 17:00", "02.02.26 23:00", QualitiSleep.GOOD));
+        SleepAnalysisResult result = new BadSleepQuality().apply(zeroSessions);
 
-        assertNull(result.getResult(), "Сессии пустые , соответственно там должен быть NULL");
+        assertEquals(0,result.getResult(), "Сессии пустые , соответственно там должен быть 0");
     }
 
     //Тестировка количества сессий сна
@@ -91,10 +91,9 @@ public class SleepTrackerAppTest {
     public void testMinimalOfZeroSession() {
         SleepAnalysisResult testResult = new MinimalSleepSessions().apply(zeroSessions);
         SleepAnalysisResult expectedResult = new SleepAnalysisResult(
-                "Не найдена минимальная сессия сна", "-");
+                "Самое маленькое время которое вы спали(в минутах)", Duration.ofMinutes(0).toMinutes());
 
-        assertEquals(expectedResult, testResult,
-                "Должен вернуть совсем другое описание т.к в листе сессий пусто и минимальную сессию не возможно найти.");
+        assertEquals(expectedResult, testResult, "Должно быть 0 ");
     }
 
     //тест поиска максимального времени продолжительности сна
@@ -111,7 +110,7 @@ public class SleepTrackerAppTest {
     public void testMaximalSessionWhitZeroSessions() {
         SleepAnalysisResult testResult = new MaximumSleepSessions().apply(zeroSessions);
         SleepAnalysisResult expectedResult = new SleepAnalysisResult(
-                "Не найденна сессия с самым большим временем", "-");
+                "Самое большое время которое вы спали(в минутах)", Duration.ofMinutes(0).toMinutes());
 
         assertEquals(expectedResult, testResult,
                 "Должен вернуть совсем другое описание т.к в листе сессий пусто и максимальную сессию не возможно найти.");
@@ -128,7 +127,7 @@ public class SleepTrackerAppTest {
 
     @Test
     public void testSleeplessNightBetweenMonth() {
-        sleepSessionsTest.add(0, new SleepingSession("31.01.26 13:00", "01.02.26 00:00", "GOOD"));
+        sleepSessionsTest.add(0, new SleepingSession("31.01.26 13:00", "01.02.26 00:00", QualitiSleep.GOOD));
 
         SleepAnalysisResult result = new SleeplessNight().apply(sleepSessionsTest);
         SleepAnalysisResult expected = new SleepAnalysisResult("Количество бессонных ночей", 3L);
@@ -139,7 +138,7 @@ public class SleepTrackerAppTest {
     @Test
     public void testSleeplessNightWhitOutSessions() {
         SleepAnalysisResult result = new SleeplessNight().apply(zeroSessions);
-        SleepAnalysisResult expected = new SleepAnalysisResult("Список пуст.Нельзя посчитать количество бессоных ночей", -1);
+        SleepAnalysisResult expected = new SleepAnalysisResult("Количество бессонных ночей", 0);
 
         assertEquals(expected, result, "Смотрим количество бессоных ночей... Включая переходящий месяц");
     }
@@ -153,9 +152,9 @@ public class SleepTrackerAppTest {
 
     @Test
     public void testClassificateUserOwl() {
-        sleepSessionsTest.add(new SleepingSession("06.02.26 23:15", "07.02.26 10:00", "GOOD"));
-        sleepSessionsTest.add(new SleepingSession("07.02.26 23:15", "08.02.26 10:00", "GOOD"));
-        sleepSessionsTest.add(new SleepingSession("08.02.26 23:15", "09.02.26 10:00", "GOOD"));
+        sleepSessionsTest.add(new SleepingSession("06.02.26 23:15", "07.02.26 10:00", QualitiSleep.GOOD));
+        sleepSessionsTest.add(new SleepingSession("07.02.26 23:15", "08.02.26 10:00", QualitiSleep.GOOD));
+        sleepSessionsTest.add(new SleepingSession("08.02.26 23:15", "09.02.26 10:00", QualitiSleep.GOOD));
         SleepAnalysisResult result = new UserClassification().apply(sleepSessionsTest);
 
         assertEquals("Сова", result.getResult(), "Проверка классификации пользователя. На сову");
@@ -163,9 +162,9 @@ public class SleepTrackerAppTest {
 
     @Test
     public void testClassificateUserLark() {
-        sleepSessionsTest.add(new SleepingSession("06.02.26 21:15", "07.02.26 06:50", "GOOD"));
-        sleepSessionsTest.add(new SleepingSession("07.02.26 21:15", "08.02.26 06:50", "GOOD"));
-        sleepSessionsTest.add(new SleepingSession("08.02.26 21:15", "09.02.26 06:50", "GOOD"));
+        sleepSessionsTest.add(new SleepingSession("06.02.26 21:15", "07.02.26 06:50", QualitiSleep.GOOD));
+        sleepSessionsTest.add(new SleepingSession("07.02.26 21:15", "08.02.26 06:50", QualitiSleep.GOOD));
+        sleepSessionsTest.add(new SleepingSession("08.02.26 21:15", "09.02.26 06:50", QualitiSleep.GOOD));
         SleepAnalysisResult result = new UserClassification().apply(sleepSessionsTest);
 
         assertEquals("Жаворонок", result.getResult(), "Проверка классификации пользователя. На жаворонок");

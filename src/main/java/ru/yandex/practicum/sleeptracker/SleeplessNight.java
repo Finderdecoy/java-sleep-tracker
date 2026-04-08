@@ -1,16 +1,20 @@
 package ru.yandex.practicum.sleeptracker;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Period;
 import java.util.List;
 import java.util.function.Function;
 
 public class SleeplessNight implements Function<List<SleepingSession>, SleepAnalysisResult> {
+    public static final String COUNT_SLEEPLESS_SESSION = "Количество бессонных ночей";
 
     @Override
     public SleepAnalysisResult apply(List<SleepingSession> sleepingSessions) {
 
         if (sleepingSessions.isEmpty()) {
-            return new SleepAnalysisResult("Список пуст.Нельзя посчитать количество бессоных ночей", -1);
+            return new SleepAnalysisResult(COUNT_SLEEPLESS_SESSION, 0);
         }
 
         LocalDate firstDayOfSession;
@@ -30,6 +34,6 @@ public class SleeplessNight implements Function<List<SleepingSession>, SleepAnal
                             (sp.getStartSleep().isBefore(sixClocks) && sp.getFinishSleep().isAfter(twentyClocks)
                             ));
                 }).count();
-        return new SleepAnalysisResult("Количество бессонных ночей", sleeplessNightsCount);
+        return new SleepAnalysisResult(COUNT_SLEEPLESS_SESSION, sleeplessNightsCount);
     }
 }

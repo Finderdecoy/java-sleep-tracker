@@ -1,6 +1,8 @@
 package ru.yandex.practicum.sleeptracker;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +20,13 @@ public class SleepTrackerApp {
                 new FileReader("src/main/resources/sleep_log.txt", StandardCharsets.UTF_8))) {
             sleepingSessions = br.lines().map(s -> {
                 String[] sp = s.split(";");
-                return new SleepingSession(sp[0], sp[1], sp[2]);
+                QualitiSleep qual = null;
+                switch (sp[2]) {
+                    case "GOOD" -> qual = QualitiSleep.GOOD;
+                    case "BAD" -> qual = QualitiSleep.BAD;
+                    case "NORMAL" -> qual = QualitiSleep.NORMAL;
+                }
+                return new SleepingSession(sp[0], sp[1], qual);
             }).collect(Collectors.toList());
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -28,7 +36,7 @@ public class SleepTrackerApp {
         functions.add(new MaximumSleepSessions());
         functions.add(new MinimalSleepSessions());
         functions.add(new AvarageMinutsSession());
-        functions.add(new SleepQuality());
+        functions.add(new BadSleepQuality());
         functions.add(new SleeplessNight());
         functions.add(new UserClassification());
 
